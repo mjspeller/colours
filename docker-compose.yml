@@ -1,0 +1,11 @@
+version: '3.8'
+
+services:
+  colours:
+    build: .
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./images:/app/images
+      - ./sounds:/app/sounds
+      - ./ai_voice:/app/ai_voice

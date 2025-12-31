@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Colour & Shape Learning</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #shape-container {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 40px;
+        }
+
+        #shape {
+            width: 50vh;
+            height: 50vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .circle {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 5px solid #333;
+        }
+
+        .square {
+            width: 100%;
+            height: 100%;
+            border: 5px solid #333;
+        }
+
+        .triangle {
+            width: 0;
+            height: 0;
+            border-left: 25vh solid transparent;
+            border-right: 25vh solid transparent;
+            border-bottom: 43.3vh solid;
+            margin: 0 auto;
+            filter: drop-shadow(0 0 3px #333);
+        }
+
+        .rectangle {
+            width: 100%;
+            height: 60%;
+            border: 5px solid #333;
+        }
+
+        .star {
+            width: 0;
+            height: 0;
+            border-left: 25vh solid transparent;
+            border-right: 25vh solid transparent;
+            border-bottom: 17.3vh solid;
+            position: relative;
+            filter: drop-shadow(0 0 3px #333);
+        }
+
+        .star:before {
+            content: '';
+            position: absolute;
+            left: -25vh;
+            top: 5.8vh;
+            width: 0;
+            height: 0;
+            border-left: 25vh solid transparent;
+            border-right: 25vh solid transparent;
+            border-top: 17.3vh solid;
+        }
+
+        .heart {
+            position: relative;
+            width: 40vh;
+            height: 36vh;
+            filter: drop-shadow(0 0 3px #333);
+        }
+
+        .heart::before,
+        .heart::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            width: 20vh;
+            height: 32vh;
+            background: red;
+            border-radius: 50% 50% 0 0;
+        }
+
+        .heart::before {
+            left: 20vh;
+            transform: rotate(-45deg);
+            transform-origin: 0% 100%;
+        }
+
+        .heart::after {
+            left: 0;
+            transform: rotate(45deg);
+            transform-origin: 100% 100%;
+        }
+
+        .diamond {
+            width: 35vh;
+            height: 35vh;
+            transform: rotate(45deg);
+            margin: 7.5vh;
+            border: 5px solid #333;
+        }
+
+        .oval {
+            width: 100%;
+            height: 65%;
+            border-radius: 50%;
+            border: 5px solid #333;
+        }
+
+        #colour-label {
+            font-size: 8vh;
+            font-weight: bold;
+            color: #333;
+            text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.3);
+            padding: 20px 40px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 20px;
+        }
+
+        #buttons {
+            position: absolute;
+            bottom: 50px;
+            display: none;
+            gap: 30px;
+        }
+
+        button {
+            padding: 20px 40px;
+            font-size: 24px;
+            font-weight: bold;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+            transition: transform 0.1s;
+        }
+
+        button:active {
+            transform: scale(0.95);
+        }
+
+        #correct {
+            background: #4CAF50;
+            color: white;
+        }
+
+        #incorrect {
+            background: #f44336;
+            color: white;
+        }
+
+        #start {
+            background: #2196F3;
+            color: white;
+            padding: 30px 60px;
+            font-size: 32px;
+        }
+
+        #nameInput {
+            padding: 15px 20px;
+            font-size: 24px;
+            border: 3px solid #2196F3;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+            width: 300px;
+        }
+
+        #nameInput::placeholder {
+            color: #999;
+        }
+
+        #feedback {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-size: contain;
+            background-position: center;
+            background-repeat: no-repeat;
+            display: none;
+            z-index: 1000;
+        }
+
+        #scrollingText {
+            position: fixed;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 15vh;
+            font-weight: bold;
+            color: #FFD700;
+            text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.5), -2px -2px 4px rgba(255, 255, 255, 0.3);
+            white-space: nowrap;
+            z-index: 1001;
+            display: none;
+        }
+
+        @keyframes scrollLeft {
+            from {
+                left: 100%;
+            }
+
+            to {
+                left: -100%;
+            }
+        }
+
+        .scrolling {
+            display: block !important;
+            animation: scrollLeft 3s linear;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="shape-container">
+        <div id="shape"></div>
+        <div id="colour-label"></div>
+    </div>
+
+    <input type="text" id="nameInput" placeholder="Child's Name (optional)">
+    <button id="start">Start</button>
+
+    <div id="buttons">
+        <button id="correct">✓ Correct</button>
+        <button id="incorrect">✗ Incorrect</button>
+    </div>
+
+    <div id="feedback"></div>
+    <div id="scrollingText"></div>
+    <audio id="audio"></audio>
+
+    <script>
+        const shapeContainer = document.getElementById('shape-container');
+        const shapeDiv = document.getElementById('shape');
+        const colourLabel = document.getElementById('colour-label');
+        const nameInput = document.getElementById('nameInput');
+        const startBtn = document.getElementById('start');
+        const buttonsDiv = document.getElementById('buttons');
+        const correctBtn = document.getElementById('correct');
+        const incorrectBtn = document.getElementById('incorrect');
+        const feedbackDiv = document.getElementById('feedback');
+        const scrollingText = document.getElementById('scrollingText');
+        const audio = document.getElementById('audio');
+
+        let childName = '';
+        let ttsAvailable = false;
+        let currentColour = '';
+        let currentShape = '';
+
+        // Color map for CSS
+        const colourMap = {
+            'red': '#FF0000',
+            'blue': '#0000FF',
+            'green': '#00FF00',
+            'yellow': '#FFFF00',
+            'orange': '#FFA500',
+            'purple': '#800080',
+            'pink': '#FFC0CB',
+            'brown': '#8B4513',
+            'black': '#000000',
+            'white': '#FFFFFF'
+        };
+
+        // Check if AI voice TTS is available
+        fetch('/tts-available')
+            .then(r => r.json())
+            .then(data => {
+                ttsAvailable = data.available;
+                console.log('TTS available:', ttsAvailable);
+            })
+            .catch(() => {
+                ttsAvailable = false;
+            });
+
+        // Speak text using AI voice
+        async function speakText(text) {
+            if (!ttsAvailable) return;
+
+            try {
+                const response = await fetch('/speak', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text: text })
+                });
+
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = URL.createObjectURL(blob);
+                    const ttsAudio = new Audio(url);
+                    ttsAudio.play().catch(() => { });
+                    ttsAudio.onended = () => URL.revokeObjectURL(url);
+                }
+            } catch (e) {
+                console.log('TTS error:', e);
+            }
+        }
+
+        // Load random background
+        function loadBackground() {
+            fetch('/images/backgrounds/')
+                .then(() => {
+                    const bgNum = Math.floor(Math.random() * 10) + 1;
+                    document.body.style.backgroundImage = `url('/images/backgrounds/bg${bgNum}.jpg')`;
+                })
+                .catch(() => {
+                    document.body.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+                });
+        }
+
+        // Get new random colour and shape
+        function getNewCombination() {
+            fetch('/random-combination')
+                .then(r => r.json())
+                .then(data => {
+                    currentColour = data.colour;
+                    currentShape = data.shape;
+
+                    // Update the shape
+                    shapeDiv.className = '';
+                    shapeDiv.innerHTML = '';
+                    const shapeElement = document.createElement('div');
+                    shapeElement.className = currentShape;
+
+                    // Set the color
+                    const color = colourMap[currentColour];
+                    if (currentShape === 'triangle') {
+                        shapeElement.style.borderBottomColor = color;
+                    } else if (currentShape === 'star') {
+                        shapeElement.style.borderBottomColor = color;
+                        const beforeStyle = document.createElement('style');
+                        beforeStyle.innerHTML = `.star:before { border-top-color: ${color} !important; }`;
+                        document.head.appendChild(beforeStyle);
+                    } else if (currentShape === 'heart') {
+                        const heartStyle = document.createElement('style');
+                        heartStyle.innerHTML = `.heart:before, .heart:after { background: ${color} !important; }`;
+                        document.head.appendChild(heartStyle);
+                    } else {
+                        shapeElement.style.backgroundColor = color;
+                    }
+
+                    shapeDiv.appendChild(shapeElement);
+
+                    // Update label
+                    colourLabel.textContent = `${currentColour} ${currentShape}`;
+
+                    // Show everything
+                    shapeContainer.style.display = 'flex';
+                    buttonsDiv.style.display = 'flex';
+                    startBtn.style.display = 'none';
+                    nameInput.style.display = 'none';
+                });
+        }
+
+        // Play feedback
+        async function playFeedback(isCorrect) {
+            const type = isCorrect ? 'correct' : 'incorrect';
+
+            // Hide shape and buttons
+            shapeContainer.style.display = 'none';
+            buttonsDiv.style.display = 'none';
+
+            // Get random image and sound
+            const imgResponse = await fetch(`/random-media/images/${type}`).then(r => r.json());
+            const sndResponse = await fetch(`/random-media/sounds/${type}`).then(r => r.json());
+
+            // Show feedback image
+            if (imgResponse.file) {
+                feedbackDiv.style.backgroundImage = `url('/images/${type}/${imgResponse.file}')`;
+            }
+            feedbackDiv.style.display = 'block';
+
+            // Play sound
+            if (sndResponse.file) {
+                audio.src = `/sounds/${type}/${sndResponse.file}`;
+                audio.play().catch(() => { });
+            }
+
+            // Show scrolling text
+            if (isCorrect) {
+                const name = childName || 'friend';
+                scrollingText.textContent = `Well done ${name}!`;
+            } else {
+                scrollingText.textContent = `Incorrect, it was a ${currentColour} ${currentShape}`;
+            }
+            scrollingText.classList.add('scrolling');
+            scrollingText.addEventListener('animationend', () => {
+                scrollingText.classList.remove('scrolling');
+            }, { once: true });
+
+            // Speak the scrolling text using AI voice (if available)
+            speakText(scrollingText.textContent);
+
+            // After 2 seconds, show next combination
+            setTimeout(() => {
+                feedbackDiv.style.display = 'none';
+                getNewCombination();
+            }, 2000);
+        }
+
+        // Event listeners
+        startBtn.addEventListener('click', () => {
+            childName = nameInput.value.trim();
+            getNewCombination();
+        });
+        correctBtn.addEventListener('click', () => playFeedback(true));
+        incorrectBtn.addEventListener('click', () => playFeedback(false));
+
+        // Initialize
+        loadBackground();
+    </script>
+</body>
+
+</html>
